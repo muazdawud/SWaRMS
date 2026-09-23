@@ -5,12 +5,12 @@
 #include "HX711.h"
 
 
-#define stepSpeed 13U
+#define stepSpeed 10U
 #define stepPerRevolution 2048U
 
-#define CP_Distance 5
-#define IG_Distance 3
-#define EG_Distance 3
+#define CP_Distance 5U
+#define IG_Distance 3U
+#define EG_Distance 3U
 
 #define loadCellSck 22U
 #define loadCellData 23U
@@ -77,6 +77,15 @@ volatile uint8_t fan_Flag = 0;
 volatile uint32_t fan_counter = 0;
 
 
+void initScale();
+void testStepper();
+void interrupt_routine();
+uint32_t handlePollScale();
+void CP_Step();
+void EG_Step();
+void IG_Step();
+
+
 void IRAM_ATTR onTimer() {
 
   portENTER_CRITICAL_ISR(&timerMux);
@@ -101,7 +110,7 @@ void IRAM_ATTR onTimer() {
   }
 
   portENTER_CRITICAL_ISR(&timerMux);
-  if((interrupt_counter - fan_counter) > 60){
+  if ((interrupt_counter - fan_counter) > 60) {
     fan_counter = interrupt_counter;
     fan_Flag ^= 1;
   }
@@ -121,15 +130,11 @@ void setup() {
 
   pinMode(Fan_Pin, OUTPUT);
 
-  timer = timerBegin(1000);
+  timer = timerBegin(10000);
   timerAttachInterrupt(timer, &onTimer);
   timerAlarm(timer, 100, true, 0);
 
   startup_flag = 1;
-
-  IG_Stepper.setSpeed(stepSpeed);
-  EG_Stepper.setSpeed(stepSpeed);
-  CP_Stepper.setSpeed(stepSpeed);
 
   testStepper();
 
@@ -153,21 +158,19 @@ void loop() {
   }
 
   if (CP_State && !EG_State) {
-    
-      CP_Step();
-  }
-  else if (IG_State && !UNIVERSAL_LOCK && !(CP_State) && !(EG_State)) {
+
+    CP_Step();
+  } else if (IG_State && !UNIVERSAL_LOCK && !(CP_State) && !(EG_State)) {
 
     IG_Step();
 
-    if(LTS){
+    if (LTS) {
       UNIVERSAL_LOCK = 1;
       LTS = 0;
     }
-  }
-  else if (EG_State && !(CP_State) && !(IG_State)) {
+  } else if (EG_State && !(CP_State) && !(IG_State)) {
 
-      EG_Step();
+    EG_Step();
   }
 
   if (test_weight && scale.is_ready()) {
@@ -181,76 +184,8 @@ void loop() {
     }
   }
 
-  if(weight >= ((W_Threshold / 10) * 5)){
+  if (weight >= ((W_Threshold / 10) * 5)) {
     digitalWrite(Fan_Pin, fan_Flag);
-  }
-}
-
-
-void interrupt_routine() {
-
-  stepping = (CP_State) | (EG_State) | (IG_State);
-
-  if (digitalRead(CP_Button) && !(stepping)) {
-    if (CP_Debounce && (!EG_Debounce && !IG_Debounce)) {
-      CP_State = 1;
-      CP_Debounce = 0;
-    } else {
-      CP_Debounce = 1;
-    }
-
-  } else {
-    CP_Debounce = 0;
-  }
-
-  if (digitalRead(IG_Button) && !(stepping)) {
-    if (IG_Debounce && (!EG_Debounce && !CP_Debounce)) {
-      IG_State = 1;
-      IG_Debounce = 0;
-    } else {
-      IG_Debounce = 1;
-    }
-
-  } else {
-    IG_Debounce = 0;
-  }
-
-  if (digitalRead(EG_Button) && !(stepping)) {
-    if (EG_Debounce && (!IG_Debounce && !CP_Debounce)) {
-      EG_State = 1;
-      EG_Debounce = 0;
-    } else {
-      EG_Debounce = 1;
-    }
-
-  } else {
-    EG_Debounce = 0;
-  }
-
-  if ((interrupt_counter - count) >= 100) {
-    test_weight = 1;
-    count = interrupt_counter;
-  }
-
-  if (weight >= W_Threshold) {
-    if(++weight_redundant_check > 3){
-      if (!(IG_Position) && !(UNIVERSAL_LOCK)) {
-        if (CP_Position) {
-
-          CP_State = 1;
-        }
-        
-        LTS = 1;
-        IG_State = 1;
-      }
-
-      weight_redundant_check = 0;
-    }
-  }
-  else{
-    LTS = 0;
-    UNIVERSAL_LOCK = 0;
-    weight_redundant_check = 0;
   }
 }
 
@@ -273,6 +208,10 @@ void initScale() {
 
 void testStepper() {
 
+  IG_Stepper.setSpeed(stepSpeed);
+  EG_Stepper.setSpeed(stepSpeed);
+  CP_Stepper.setSpeed(stepSpeed);
+
   IG_Stepper.step(stepPerRevolution);
   IG_Stepper.step(-1 * stepPerRevolution);
 
@@ -290,10 +229,79 @@ void testStepper() {
 }
 
 
+void interrupt_routine() {
+
+  stepping = (CP_State) | (EG_State) | (IG_State);
+
+  if (!digitalRead(CP_Button) && !(stepping)) {
+    if (CP_Debounce && (!EG_Debounce && !IG_Debounce)) {
+      CP_State = 1;
+      CP_Debounce = 0;
+    } else {
+      CP_Debounce = 1;
+    }
+
+  } else {
+    CP_Debounce = 0;
+  }
+
+  if (!digitalRead(IG_Button) && !(stepping)) {
+    if (IG_Debounce && (!EG_Debounce && !CP_Debounce)) {
+      IG_State = 1;
+      IG_Debounce = 0;
+    } else {
+      IG_Debounce = 1;
+    }
+
+  } else {
+    IG_Debounce = 0;
+  }
+
+  if (!digitalRead(EG_Button) && !(stepping)) {
+    if (EG_Debounce && (!IG_Debounce && !CP_Debounce)) {
+      EG_State = 1;
+      EG_Debounce = 0;
+    } else {
+      EG_Debounce = 1;
+    }
+
+  } else {
+    EG_Debounce = 0;
+  }
+
+  if ((interrupt_counter - count) >= 100) {
+    test_weight = 1;
+    count = interrupt_counter;
+  }
+
+  if (weight >= W_Threshold) {
+    if (++weight_redundant_check > 3) {
+      if (!(IG_Position) && !(UNIVERSAL_LOCK)) {
+        if (CP_Position) {
+
+          CP_State = 1;
+        }
+
+        LTS = 1;
+        IG_State = 1;
+      }
+
+      weight_redundant_check = 0;
+    }
+  } else {
+    LTS = 0;
+    UNIVERSAL_LOCK = 0;
+    weight_redundant_check = 0;
+  }
+
+  stepping = 0;
+}
+
+
 uint32_t handlePollScale() {
 
   int32_t scaleAverage = 0;
-  
+
   scaleAverage = scale.get_units();
 
   test_weight = 0;
@@ -308,44 +316,62 @@ uint32_t handlePollScale() {
 
 void CP_Step() {
 
-  int8_t steps = (CP_Position) ? -1 : 1;
-
-  for (uint8_t i = 0; i < CP_Distance; i++) {
-    for(uint8_t k = 0; k < (stepPerRevolution / 256); k++){
-        CP_Stepper.step(steps);
-    }
-  }
+  oldState = 1;
 
   CP_State = 0;
   CP_Position ^= 1;
+
+  int8_t steps = (CP_Position) ? -1 : 1;
+
+  for (uint8_t i = 0; i < CP_Distance; i++) {
+    for (uint16_t k = 0; k < stepPerRevolution; k++) {
+      CP_Stepper.step(steps);
+    }
+    digitalWrite(BlueLED, (oldState ^= 1));
+  }
+
+  digitalWrite(BlueLED, HIGH);
+  oldState = 0;
 }
 
 
 void IG_Step() {
 
-  int8_t steps = (IG_Position) ? -1 : 1;
-
-  for (uint8_t i = 0; i < IG_Distance; i++) {
-    for(uint8_t k = 0; k < stepPerRevolution; k++){
-        IG_Stepper.step(steps);
-    }
-  }
+  oldState = 1;
 
   IG_State = 0;
   IG_Position ^= 1;
+
+  int8_t steps = (IG_Position) ? -1 : 1;
+
+  for (uint8_t i = 0; i < IG_Distance; i++) {
+    for (uint16_t k = 0; k < stepPerRevolution; k++) {
+      IG_Stepper.step(steps);
+    }
+    digitalWrite(BlueLED, (oldState ^= 1));
+  }
+
+  digitalWrite(BlueLED, HIGH);
+  oldState = 0;
 }
 
 
 void EG_Step() {
 
-  int8_t steps = (EG_Position) ? -1 : 1;
-
-  for (uint8_t i = 0; i < EG_Distance; i++) {
-    for(uint8_t k = 0; k < stepPerRevolution; k++){
-        EG_Stepper.step(steps);
-    }
-  }
+  oldState = 1;
 
   EG_State = 0;
   EG_Position ^= 1;
+
+  int8_t steps = (EG_Position) ? -1 : 1;
+
+  for (uint8_t i = 0; i < EG_Distance; i++) {
+    for (uint16_t k = 0; k < stepPerRevolution; k++) {
+      EG_Stepper.step(steps);
+    }
+    digitalWrite(BlueLED, (oldState ^= 1));
+  }
+
+  digitalWrite(BlueLED, HIGH);
+  oldState = 0;
 }
