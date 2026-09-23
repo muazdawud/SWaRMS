@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404: Not Found</title>
+    <link rel="icon" sizes="48x48" type="image/ico" href="/favicon.ico" />
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-family: sans-serif;
+        text-align: center;
+        padding-top: 40px;
+        background-color: rgb(65, 122, 122);
+        color: azure;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>404: Not Found</h1>
+    <p>
+      Sorry, the resource
+      <span id="error-uri" style="font-weight: bold">[Loading URI...]</span> was
+      not found on this device.
+    </p>
+    <p>
+      Please check the URL or return to the <a href="/homepage">homepage</a>.
+    </p>
+    <script>
+      const uriElement = document.getElementById("error-uri");
+
+      if (uriElement) {
+        const fullPath = window.location.href;
+
+        const hostname = window.location.host;
+        const protocol = window.location.protocol;
+
+        const baseUrl = protocol + "//" + hostname;
+
+        const requestedUri = fullPath.replace(baseUrl, "");
+
+        if (requestedUri.length > 0) {
+          uriElement.textContent = requestedUri;
+        } else {
+          uriElement.textContent = window.location.pathname;
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" sizes="48x48" type="image/ico" href="/favicon.ico" />
+
+        <title>Home Page</title>
+        <style>
+        body {
+            color: azure;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        #page {
+            min-width: 1000px;
+            display: flex;
+            min-height: 100dvh;
+        }
+        #sidebar {
+            background-color: rgb(7, 77, 77);
+            padding: 10px 0px;
+            width: 250px;
+            box-shadow: 1px 1px 6px #1b1b1b;
+        }
+        #main-content {
+            background-color: rgb(65, 122, 122);
+            flex-grow: 1;
+            padding: 40px;
+        }
+        #header {
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: 700;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(252, 252, 252, 0.781);
+        }
+        #but {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        input {
+            font-weight: 500;
+            font-size: medium;
+            padding: 25px;
+            text-align: center;
+            display: block;
+            width: 250px;
+            cursor: pointer;
+            background-color: rgb(7, 77, 77);
+            text-decoration: none;
+            border: 1.5px solid rgb(7, 77, 77);
+            box-shadow: none;
+            color: azure;
+        }
+        input:hover {
+            background-color: rgba(25, 216, 216, 0.349);
+            transition: background-color 0.5s;
+        }
+        span {
+            font-weight: 600;
+            font-display: block;
+        }
+        li {
+            padding:10px;
+        }
+        </style>
+    </head>
+
+    <body>
+        <div id="page">
+            <div id="sidebar">
+                <p id="header">ESP8266 Dashboard</p>
+                <p style="font-size: 1em; text-align: center; font-weight: 600">
+                List of Content
+                </p>
+
+                <div id="but">
+                    <form action="/update_firmware" method="POST" target="_self">
+                        <input
+                            type="submit"
+                            name="firmwareupdate"
+                            value="Update Firmware"
+                        />
+                    </form>
+                    <form action="/file_upload" method="POST" target="_self">
+                        <input
+                            type="submit"
+                            name="fileupload"
+                            value="Upload File"
+                        />
+                    </form>
+                    <form action="/change_credential" method="POST" target="_self">
+                        <input
+                            type="submit"
+                            name="change_cred"
+                            value="Update WiFi Credentials"
+                        />
+                    </form>
+                    <form action="/control_led" method="POST" target="_self">
+                        <input
+                            type="submit"
+                            name="ledcontrol"
+                            value="Control LED"
+                        />
+                    </form>
+                    <form action="/view_file" method="POST" target="_self">
+                        <input
+                            type="submit"
+                            name="fileview"
+                            value="View File"
+                        />
+                    </form>
+                </div>
+            </div>
+
+            <div id="main-content">
+                <h1 style="padding-bottom: 10px">
+                    Welcome to the ESP8266 Server Dashboard
+                </h1>
+                <p style="text-align: left;">
+                    This is a typical Server that provides some basic (like Viewing File, Uploading File) to advance features (like Wireless Firmware Update, Simulating Web Sockets through LED Control) which are all available and ready to be tested.<br>
+                    <h2>Features:</h2>
+                    <li><span>Firmware Update:</span> This is a feature that allows flashing the board with a new/updated firmware and it usually takes binary files as input.</li>
+                    <li><span>File Upoad:</span> This provides privilages to upload new files/updated (like new HTML /index file) into the LittleFS for storage and usage.</li>
+                    <li><span>Update Credentials:</span> This provide the way in which your device can be configured and set to connect to routers/acess points to access the internet.</li>
+                    <li><span>Control LED:</span> This page provides access and provides features that enable the usage and application of <span>Web Sockets</span> which is a robust protocol in the Internet Protocol as a whole.</li>
+                    <li><span>View File:</span> This is another feature that allows a client to fetch and view files which were stored on the LittleFS.</li>
+                </p>
+            </div>
+        </div>
+    </body>
+</html>

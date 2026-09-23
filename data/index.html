@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ESP8266 Web Server</title>
+    <link rel="icon" sizes="48x48" type="image/ico" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 40px;
+        font-family: sans-serif;
+        text-align: center;
+        background-color: rgb(65, 122, 122);
+        color: azure;
+      }
+      h1 {
+        border: 4px solid rgb(44, 85, 85); /* Blue border */
+        padding: 30px;
+        border-radius: 15px;
+        width: 370px;
+        background-color: darkcyan;
+        margin: auto;
+        box-shadow: 3px 3px 10px #1b1b1b;
+      }
+      .text {
+        font-weight: bold;
+      }
+      span {
+        text-decoration: solid;
+        font-style: oblique;
+        font-weight: 500;
+      }
+      input {
+        border: 4px solid rgb(44, 85, 85); /* Blue border */
+        padding: 8px;
+        border-radius: 15px;
+        box-shadow: 1px 1px 6px #1b1b1b;
+      }
+      #but {
+        color: azure;
+        background-color: darkcyan;
+        cursor: pointer;
+      }
+      #but:hover {
+        background-color: rgb(44, 85, 85);
+        cursor: pointer;
+        box-shadow: 3px 3px 10px #1b1b1b;
+      }
+      #custom {
+        color: rgb(255, 255, 255);
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="page_container">
+      <div id="side-container"></div>
+      <div id="main-container">
+        <h1>Hello, Welcome to the ESP8266 Web Server</h1>
+        <br />
+        <p class="text">Login to explore the wonders of the Server.</p>
+        <br />
+        <form
+          id="login-form"
+          action="/login"
+          method="POST"
+          target="_self"
+          autocomplete="on"
+        >
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            maxlength="20"
+            size="26"
+            required
+          /><br /><br />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            maxlength="20"
+            size="26"
+            required
+          /><br /><br />
+          <input id="but" type="submit" value="Login" />
+        </form>
+        <p id="message" style="color: rgb(156, 16, 16)"></p>
+        <p id="custom">
+          Try '<span>Kibris Order</span>' and '<span>Shop@K_O</span>'
+        </p>
+      </div>
+    </div>
+    <script>
+      const loginForm = document.getElementById("login-form");
+      const messageDisplay = document.getElementById("message");
+      loginForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formData = new URLSearchParams(
+          new FormData(loginForm)
+        ).toString();
+
+        try {
+          const response = await fetch("/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: formData,
+          });
+
+          if (response.ok) {
+            const redirectTo = response.headers.get("Location");
+            window.location.href = redirectTo;
+            return;
+          } else if (response.status === 401) {
+            messageDisplay.textContent = "Invalid username or password.";
+          } else if (response.status === 400) {
+            messageDisplay.textContent =
+              "Missing Credentials. Please fill out both fields.";
+          } else if (response.status === 500) {
+            messageDisplay.textContent =
+              "Server Error: Try again after some time.";
+          } else {
+            messageDisplay.textContent = `Server Error: Status ${response.status}.`;
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+          messageDisplay.textContent = "Could not connect to server.";
+        }
+      });
+    </script>
+  </body>
+</html>
