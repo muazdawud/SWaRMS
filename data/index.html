@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>ESP8266 Web Server</title>
+    <title>SWaRMS Server</title>
     <link rel="icon" sizes="48x48" type="image/ico" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
@@ -11,22 +11,27 @@
         flex-direction: column;
         align-items: center;
         padding-top: 40px;
-        font-family: sans-serif;
+        font-family:'Courier New', Courier, monospace;
         text-align: center;
-        background-color: rgb(65, 122, 122);
-        color: azure;
+        background-color: rgba(255, 255, 255, 0.719);
+        color: rgb(255, 255, 255);
       }
       h1 {
-        border: 4px solid rgb(44, 85, 85); /* Blue border */
+        border: 4px solid rgba(32, 255, 32, 0.89);
         padding: 30px;
-        border-radius: 15px;
+        border-radius: 100px;
         width: 370px;
-        background-color: darkcyan;
+        color: #ffffff;
+        background-color: rgba(10, 121, 25, 0.849);
         margin: auto;
         box-shadow: 3px 3px 10px #1b1b1b;
+        font-family: 'Courier New', Courier, monospace;
       }
       .text {
         font-weight: bold;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: large;
+        color: #1b1b1bb6;
       }
       span {
         text-decoration: solid;
@@ -34,24 +39,27 @@
         font-weight: 500;
       }
       input {
-        border: 4px solid rgb(44, 85, 85); /* Blue border */
+        border: 4px solid rgba(32, 255, 32, 0.89); /* Blue border */
         padding: 8px;
         border-radius: 15px;
         box-shadow: 1px 1px 6px #1b1b1b;
       }
       #but {
-        color: azure;
-        background-color: darkcyan;
+        color: rgb(255, 255, 255);
+        background-color: rgba(10, 121, 25, 0.849);
         cursor: pointer;
+        font-family: inherit;
       }
       #but:hover {
-        background-color: rgb(44, 85, 85);
+        background-color: rgb(16, 95, 26);
+        color: rgb(255, 255, 255);
         cursor: pointer;
         box-shadow: 3px 3px 10px #1b1b1b;
       }
       #custom {
         color: rgb(255, 255, 255);
         font-weight: 700;
+        font-family: 'Courier New', Courier, monospace;
       }
     </style>
   </head>
@@ -59,13 +67,13 @@
     <div id="page_container">
       <div id="side-container"></div>
       <div id="main-container">
-        <h1>Hello, Welcome to the ESP8266 Web Server</h1>
+        <h1>SWaRMS Server</h1>
         <br />
-        <p class="text">Login to explore the wonders of the Server.</p>
+        <p class="text">Login to access SWaRMS station.</p>
         <br />
         <form
           id="login-form"
-          action="/login"
+          action="/$login"
           method="POST"
           target="_self"
           autocomplete="on"
@@ -88,9 +96,9 @@
           /><br /><br />
           <input id="but" type="submit" value="Login" />
         </form>
-        <p id="message" style="color: rgb(156, 16, 16)"></p>
+        <p id="message" style="color: rgba(245, 17, 17, 0.856)"></p>
         <p id="custom">
-          Try '<span>Kibris Order</span>' and '<span>Shop@K_O</span>'
+          Try '<span>admin</span>' and '<span>0000</span>'
         </p>
       </div>
     </div>
@@ -105,7 +113,7 @@
         ).toString();
 
         try {
-          const response = await fetch("/login", {
+          const response = await fetch("/$login", {
             method: "POST",
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",

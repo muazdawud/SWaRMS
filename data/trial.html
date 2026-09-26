@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" sizes="48x48" type="image/ico" href="/favicon.ico" />
+
     <title>Home Page</title>
     <style>
       body {
@@ -20,7 +21,7 @@
       }
 
       #sidebar {
-        background-color: rgba(17, 206, 42, 0.616);
+        background-color: rgba(10, 121, 25, 0.849);
         padding: 10px 0px;
         width: 100%;
         display: flex;
@@ -28,13 +29,12 @@
         align-items: center;
         box-shadow: 1px 1px 15px #1b1b1b;
         transition: width 0.5s ease-in-out;
-        box-sizing: border-box;
       }
 
       #main-content {
         background-color: rgb(255, 255, 255);
         color: #1b1b1b;
-        width: 0%;
+        width: 0;
         opacity: 0;
         padding: 0;
         overflow: hidden;
@@ -43,7 +43,6 @@
           width 0.5s ease-in-out,
           opacity 0.5s ease-in-out,
           padding 0.5s ease-in-out;
-        box-sizing: border-box;
       }
 
       #header {
@@ -84,10 +83,9 @@
         transition: background-color 0.5s;
       }
 
-      #stationElement span {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        font-weight: 500;
-        display: inline-block;
+      span {
+        font-weight: 600;
+        display: block;
       }
 
       li {
@@ -95,11 +93,11 @@
       }
 
       #page.shifted #sidebar {
-        width: 320px;
+        width: auto;
       }
 
       #page.shifted #main-content {
-        width: calc(100% - 320px);
+        width: auto;
         opacity: 1;
         padding: 40px;
         white-space: normal;
@@ -130,14 +128,12 @@
         </p>
 
         <div id="but">
-          <form>
           <input
             type="submit"
-            name="stationName"
+            name="firmwareupdate"
             onclick="refreshPage()"
             value="Station 1: Gyadi-gyadi Kudu Ward"
           />
-          </form>
         </div>
       </div>
 
@@ -157,42 +153,141 @@
         </div>
         <div id="stationElement" style="text-align: left; padding-left: 40px">
           <p style="padding-bottom: 10px">
-            Date: <span id="date">--/--/----</span>
+            Date:
+            <span
+              id="date"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >13/05/2026</span
+            >
           </p>
           <p style="padding-bottom: 10px">
-            Time: <span id="time">--:--</span>
+            Time:
+            <span
+              id="time"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >12:30pm</span
+            >
           </p>
           <p style="padding-bottom: 10px">
-            Station Number: <span id="stationNumber">--</span>
+            Station Number:
+            <span
+              id="stationNumber"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >1</span
+            >
           </p>
           <p style="padding-bottom: 10px">
-            Station Location: <span id="stationLocation">--</span>
+            Station Location:
+            <span
+              id="stationLocation"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >Gyadi-gyadi Kudu Ward</span
+            >
           </p>
           <p style="padding-bottom: 10px">
-            Location Ambient Temperature: <span id="ambientTemperature">--</span>
+            Location Ambient Temperature:
+            <span
+              id="ambientTemperature"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >35deg</span
+            >
           </p>
           <p style="padding-bottom: 10px">
-            Location Ambient Humidity: <span id="ambientHumidity">--</span>
+            Location Ambient Humidity:
+            <span
+              id="ambientHumidity"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >32%</span
+            >
+          </p>
+
+          <p style="padding-bottom: 10px">
+            Station Status:
+            <span
+              id="stationStatus"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >Not Filled</span
+            >
           </p>
           <p style="padding-bottom: 10px">
-            Station Status: <span id="stationStatus">--</span>
+            Station Weight Percentage:
+            <span
+              id="stationWeight"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >45%</span
+            >
           </p>
           <p style="padding-bottom: 10px">
-            Station Weight Percentage: <span id="stationWeight">--</span>
+            Station Inner Temperature:
+            <span
+              id="innerTemperature"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >45deg</span
+            >
           </p>
           <p style="padding-bottom: 10px">
-            Station Inner Temperature: <span id="innerTemperature">--</span>
+            Station Inner Humidity:
+            <span
+              id="innerHumidity"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >21%</span
+            >
           </p>
           <p style="padding-bottom: 10px">
-            Station Inner Humidity: <span id="innerHumidity">--</span>
-          </p>
-          <p style="padding-bottom: 10px">
-            Fan Status: <span id="stationFan">--</span>
+            Fan Status:
+            <span
+              id="stationFan"
+              style="
+                font-family:
+                  &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+                font-weight: 500;
+              "
+              >Active</span
+            >
           </p>
         </div>
       </div>
     </div>
-
-    <script src="/home.js" type="application/javascript"></script>
   </body>
+  <script src="/home.js" type="application/javascript"></script>
 </html>
