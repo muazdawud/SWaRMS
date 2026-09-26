@@ -1,0 +1,22 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# Build outputs
+*.o
+*.elf
+*.hex
+*.bin
+*.map
+*.exe
+*.lst
+
+# IDE/Project specific
+*.vscode/
+*.idea/
+*.settings/
+*.launch
+*.project
+*.prettierrc
+
+# OS/System files
+.DS_Store
+Thumbs.db
