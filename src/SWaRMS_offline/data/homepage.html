@@ -1,0 +1,557 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="icon" sizes="48x48" type="image/x-icon" href="favicon.ico" />
+
+    <title>SWaRMS Dashboard</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-height: 100%;
+      }
+
+      body {
+        color: #ffffff;
+        font-family: "Courier New", Courier, monospace;
+        overflow: hidden;
+      }
+
+      #page {
+        width: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
+
+        display: flex;
+        overflow: hidden;
+      }
+
+      #sidebar {
+        background-color: rgba(17, 206, 42, 0.616);
+
+        width: 100%;
+        min-width: 0;
+
+        padding: 10px 0;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        box-shadow: 1px 1px 15px #1b1b1b;
+
+        transition:
+          width 0.5s ease-in-out,
+          flex-basis 0.5s ease-in-out;
+
+        flex-shrink: 0;
+      }
+
+      #header {
+        text-align: center;
+        font-size: 1.4em;
+        font-weight: 700;
+
+        padding: 0 10px 20px;
+        margin: 0;
+
+        border-bottom: 2px solid rgba(252, 252, 252, 0.781);
+
+        width: 100%;
+      }
+
+      #sidebarDescription {
+        font-size: 1em;
+        text-align: center;
+        font-weight: 600;
+
+        padding: 10px;
+        margin: 0;
+      }
+
+      #but {
+        list-style: none;
+        padding: 10px;
+        margin: 0;
+
+        width: 100%;
+
+        display: flex;
+        justify-content: center;
+      }
+
+      #stationButton {
+        font-weight: 500;
+        font-size: medium;
+        font-family: "Courier New", Courier, monospace;
+
+        padding: 25px 15px;
+
+        text-align: center;
+
+        display: block;
+
+        width: min(100%, 400px);
+
+        cursor: pointer;
+
+        background-color: rgba(10, 121, 25, 0.849);
+
+        border: 5px solid rgba(1, 216, 29, 0.925);
+
+        border-radius: 55px;
+
+        color: rgb(255, 255, 255);
+      }
+
+      #stationButton:hover {
+        background-color: rgba(0, 163, 22, 0.849);
+      }
+
+      #main-content {
+        background-color: rgb(255, 255, 255);
+        color: #1b1b1b;
+
+        flex: 0 0 0;
+        width: 0;
+
+        opacity: 0;
+
+        padding: 0;
+
+        overflow: hidden;
+
+        white-space: nowrap;
+
+        transition:
+          flex-basis 0.5s ease-in-out,
+          opacity 0.5s ease-in-out,
+          padding 0.5s ease-in-out;
+      }
+
+      #main-content h1 {
+        margin-top: 0;
+      }
+
+      #mainDescription {
+        padding-bottom: 10px;
+        font-weight: bold;
+      }
+
+      #refreshInfo {
+        padding-left: 7%;
+        margin-bottom: 20px;
+      }
+
+      #refB {
+        font-weight: 500;
+        font-size: small;
+        font-family: "Courier New", Courier, monospace;
+
+        padding: 10px 18px;
+
+        text-align: center;
+
+        display: inline-block;
+
+        width: auto;
+
+        cursor: pointer;
+
+        background-color: #eeeeee;
+        color: #1b1b1b;
+
+        border: 2px solid #777777;
+
+        border-radius: 20px;
+
+        box-shadow: none;
+      }
+
+      #refB:hover {
+        background-color: #dddddd;
+      }
+
+      #stationElement {
+        text-align: left;
+        padding-left: 40px;
+
+        white-space: normal;
+      }
+
+      #stationElement p {
+        padding-bottom: 10px;
+        margin: 0;
+      }
+
+      #stationElement span {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+        font-weight: 500;
+        display: inline-block;
+      }
+
+      #page.shifted #sidebar {
+        width: 320px;
+        flex-basis: 320px;
+      }
+
+      #page.shifted #main-content {
+        flex: 1 1 auto;
+        width: auto;
+
+        opacity: 1;
+
+        padding: 40px;
+
+        white-space: normal;
+      }
+
+      @media (max-width: 600px) {
+        #page.shifted #sidebar {
+          width: 240px;
+          flex-basis: 240px;
+        }
+
+        #page.shifted #main-content {
+          padding: 20px;
+        }
+
+        #stationElement {
+          padding-left: 10px;
+        }
+
+        #header {
+          font-size: 1.1em;
+        }
+
+        #stationButton {
+          padding: 18px 10px;
+          font-size: 0.85em;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="page">
+      ```
+      <div id="sidebar">
+        <p id="header">SWaRMS Dashboard</p>
+
+        <p id="sidebarDescription">List of SWaRMS Stations</p>
+
+        <div id="but">
+          <button id="stationButton" type="button">
+            Station 1: Gyadi-gyadi Kudu Ward
+          </button>
+        </div>
+      </div>
+
+      <div id="main-content">
+        <h1>SWaRMS Station Dashboard</h1>
+
+        <p id="mainDescription">Smart Ward-level Refuse Management Station</p>
+
+        <div id="refreshInfo">
+          <button id="refB" type="button">Refresh</button>
+        </div>
+
+        <div id="stationElement">
+          <p>
+            Date:
+            <span id="date">--/--/----</span>
+          </p>
+
+          <p>
+            Time:
+            <span id="time">--:--</span>
+          </p>
+
+          <p>
+            Station Number:
+            <span id="stationNumber">--</span>
+          </p>
+
+          <p>
+            Station Location:
+            <span id="stationLocation">--</span>
+          </p>
+
+          <p>
+            Location Ambient Temperature:
+            <span id="ambientTemperature">--</span>
+          </p>
+
+          <p>
+            Location Ambient Humidity:
+            <span id="ambientHumidity">--</span>
+          </p>
+
+          <p>
+            Station Status:
+            <span id="stationStatus">--</span>
+          </p>
+
+          <p>
+            Station Weight Percentage:
+            <span id="stationWeight">--</span>
+          </p>
+
+          <p>
+            Station Inner Temperature:
+            <span id="innerTemperature">--</span>
+          </p>
+
+          <p>
+            Station Inner Humidity:
+            <span id="innerHumidity">--</span>
+          </p>
+
+          <p>
+            Fan Status:
+            <span id="stationFan">--</span>
+          </p>
+        </div>
+      </div>
+      ```
+    </div>
+
+    <script>
+      let date;
+      let time;
+      let staNumber;
+      let locationName;
+      let ambTemp;
+      let ambHum;
+
+      let staStatus;
+      let maxWeight;
+      let weight;
+      let inTemp;
+      let inHum;
+      let fanStatus;
+
+      function safeSetText(id, text) {
+        const element = document.getElementById(id);
+
+        if (!element) {
+          console.warn("Element not found:", id);
+          return;
+        }
+
+        if (text !== undefined && text !== null) {
+          element.textContent = String(text);
+        }
+      }
+
+      const page = document.getElementById("page");
+
+      const stationButton = document.getElementById("stationButton");
+
+      const refreshButton = document.getElementById("refB");
+
+      const navigationEntries = performance.getEntriesByType("navigation");
+
+      const navigation =
+        navigationEntries.length > 0 ? navigationEntries[0] : null;
+
+      const isPageRefresh = navigation && navigation.type === "reload";
+
+      if (isPageRefresh) {
+        sessionStorage.removeItem("dashboard_shifted");
+      } else if (sessionStorage.getItem("dashboard_shifted") === "true") {
+        if (page) {
+          page.classList.add("shifted");
+        }
+      }
+
+      if (stationButton) {
+        stationButton.addEventListener("click", function () {
+          if (page) {
+            page.classList.add("shifted");
+          }
+
+          sessionStorage.setItem("dashboard_shifted", "true");
+
+          refreshPage();
+        });
+      }
+
+      let socket = null;
+
+      function connectWebSocket() {
+        const hostname = window.location.hostname;
+
+        if (!hostname) {
+          console.error("Unable to determine hostname.");
+          return;
+        }
+
+        const websocketURL = "ws://" + hostname + ":81/";
+
+        console.log("Connecting to WebSocket:", websocketURL);
+
+        socket = new WebSocket(websocketURL, ["arduino"]);
+
+        socket.onopen = function () {
+          console.log("WebSocket connected.");
+
+          socket.send("Connect " + new Date());
+        };
+
+        socket.onerror = function (error) {
+          console.error("WebSocket error:", error);
+        };
+
+        socket.onmessage = function (event) {
+          const data = event.data;
+
+          if (typeof data !== "string") {
+            console.warn("Received non-string WebSocket data.");
+            return;
+          }
+
+          if (!data.startsWith("Station Info:")) {
+            console.log("Received WebSocket message:", data);
+            return;
+          }
+
+          const cleanData = data.replace("Station Info:", "").trim();
+
+          const tokens = cleanData.split(",").map((token) => token.trim());
+
+          console.log("Station data:", tokens);
+
+          tokens.forEach(function (token, index) {
+            switch (index) {
+              case 0:
+                date = token;
+
+                safeSetText("date", date);
+
+                break;
+              case 1:
+                time = token;
+
+                safeSetText("time", time);
+
+                break;
+              case 2:
+                staNumber = token;
+
+                safeSetText("stationNumber", staNumber);
+
+                break;
+              case 3:
+                locationName = token;
+
+                safeSetText("stationLocation", locationName);
+
+                break;
+              case 4:
+                ambTemp = token;
+
+                safeSetText("ambientTemperature", ambTemp);
+
+                break;
+              case 5:
+                ambHum = token;
+
+                safeSetText("ambientHumidity", ambHum);
+
+                break;
+              case 6:
+                staStatus = token === "1" ? "Filled" : "Not Filled";
+
+                safeSetText("stationStatus", staStatus);
+
+                break;
+              case 7:
+                maxWeight = Number.parseFloat(token);
+
+                if (!Number.isFinite(maxWeight)) {
+                  maxWeight = 0;
+                }
+
+                break;
+              case 8: {
+                const currentVal = Number.parseFloat(token);
+
+                const currentWeight = Number.isFinite(currentVal)
+                  ? currentVal
+                  : 0;
+
+                if (maxWeight > 0) {
+                  weight = ((maxWeight - currentWeight) / maxWeight) * 100;
+                } else {
+                  weight = 0;
+                }
+                weight = Math.max(0, Math.min(100, weight));
+
+                safeSetText("stationWeight", weight.toFixed(2) + "%");
+
+                break;
+              }
+              case 9:
+                inTemp = token;
+
+                safeSetText("innerTemperature", inTemp);
+
+                break;
+              case 10:
+                inHum = token;
+
+                safeSetText("innerHumidity", inHum);
+
+                break;
+              case 11:
+                fanStatus = token === "1" ? "Active" : "Not Active";
+
+                safeSetText("stationFan", fanStatus);
+
+                break;
+            }
+          });
+        };
+
+        socket.onclose = function () {
+          console.log("WebSocket connection closed.");
+        };
+      }
+
+      function refreshPage() {
+        console.log("Fetching station information...");
+
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send("Refresh");
+
+          console.log("Refresh command sent.");
+        } else {
+          console.warn(
+            "WebSocket is not open. State:",
+            socket ? socket.readyState : "No socket",
+          );
+        }
+      }
+
+      if (refreshButton) {
+        refreshButton.addEventListener("click", refreshPage);
+      }
+
+      connectWebSocket();
+    </script>
+  </body>
+</html>
