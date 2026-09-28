@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>SWaRMS Server</title>
-    <link rel="icon" sizes="48x48" type="image/ico" href="favicon.ico" />
+    <link rel="icon" sizes="48x48" type="image/png" href="favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       body {
@@ -11,7 +11,7 @@
         flex-direction: column;
         align-items: center;
         padding-top: 40px;
-        font-family:'Courier New', Courier, monospace;
+        font-family: "Courier New", Courier, monospace;
         text-align: center;
         background-color: rgba(255, 255, 255, 0.719);
         color: rgb(255, 255, 255);
@@ -25,11 +25,11 @@
         background-color: rgba(10, 121, 25, 0.849);
         margin: auto;
         box-shadow: 3px 3px 10px #1b1b1b;
-        font-family: 'Courier New', Courier, monospace;
+        font-family: "Courier New", Courier, monospace;
       }
       .text {
         font-weight: bold;
-        font-family: 'Courier New', Courier, monospace;
+        font-family: "Courier New", Courier, monospace;
         font-size: large;
         color: #1b1b1bb6;
       }
@@ -59,7 +59,7 @@
       #custom {
         color: #1b1b1bb6;
         font-weight: 700;
-        font-family: 'Courier New', Courier, monospace;
+        font-family: "Courier New", Courier, monospace;
       }
     </style>
   </head>
@@ -73,7 +73,7 @@
         <br />
         <form
           id="login-form"
-          action="/$login"
+          action="/login"
           method="POST"
           target="_self"
           autocomplete="on"
@@ -97,9 +97,7 @@
           <input id="but" type="submit" value="Login" />
         </form>
         <p id="message" style="color: rgba(245, 17, 17, 0.856)"></p>
-        <p id="custom">
-          Try '<span>admin</span>' and '<span>0000</span>'
-        </p>
+        <p id="custom">Try '<span>admin</span>' and '<span>0000</span>'</p>
       </div>
     </div>
     <script>
@@ -109,11 +107,11 @@
         e.preventDefault();
 
         const formData = new URLSearchParams(
-          new FormData(loginForm)
+          new FormData(loginForm),
         ).toString();
 
         try {
-          const response = await fetch("/$login", {
+          const response = await fetch("/login", {
             method: "POST",
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",

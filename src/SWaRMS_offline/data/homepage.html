@@ -6,7 +6,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <link rel="icon" sizes="48x48" type="image/x-icon" href="favicon.ico" />
+    <link rel="icon" sizes="48x48" type="image/png" href="favicon.png" />
 
     <title>SWaRMS Dashboard</title>
 
@@ -247,7 +247,7 @@
 
   <body>
     <div id="page">
-      ```
+
       <div id="sidebar">
         <p id="header">SWaRMS Dashboard</p>
 
@@ -326,7 +326,7 @@
           </p>
         </div>
       </div>
-      ```
+
     </div>
 
     <script>
@@ -410,6 +410,7 @@
           console.log("WebSocket connected.");
 
           socket.send("Connect " + new Date());
+          refreshPage();
         };
 
         socket.onerror = function (error) {
@@ -495,7 +496,7 @@
                   : 0;
 
                 if (maxWeight > 0) {
-                  weight = ((maxWeight - currentWeight) / maxWeight) * 100;
+                  weight = (currentWeight / maxWeight) * 100;
                 } else {
                   weight = 0;
                 }
