@@ -127,6 +127,7 @@ void startUDP();
 void notFound();
 void loginAuth();
 uint32_t getTime();
+void serveFavicon();
 void startLittleFS();
 void startWebServer();
 void startWebSocket();
@@ -169,7 +170,7 @@ void IRAM_ATTR onTimer() {
   portEXIT_CRITICAL_ISR(&timerMux);
 
   portENTER_CRITICAL_ISR(&timerMux);
-  if ((interrupt_counter - NTPcount) > 600) {
+  if ((interrupt_counter - NTPcount) > 30000) {
     NTPcount = interrupt_counter;
     updateTime ^= 1;
   }
@@ -216,7 +217,9 @@ void setup() {
 
   WiFi.hostByName(NTPServerName, timeServerIP);
 
-  while (!MDNS.begin(mDNS_name)) {}
+  MDNS.begin(mDNS_name);
+
+  updateTime = 1;
   MDNS.addService("http", "tcp", 80);
 }
 
@@ -265,9 +268,7 @@ void loop() {
   }
 
   if (weight >= ((W_Threshold / 10) * 5)) {
-    digitalWrite(Fan_Pin, HIGH);
-  }else{
-    digitalWrite(Fan_Pin, LOW);
+    digitalWrite(Fan_Pin, fan_Flag);
   }
 
   if (updateTime) {
@@ -325,13 +326,17 @@ void startWebServer() {
     }
   });
 
-  server.on("/$login", HTTP_POST, loginAuth);
+  server.on("/login", HTTP_POST, loginAuth);
 
   server.on("/HomePage", HTTP_GET, [] {
     if (!streamFile("/homepage.html")) {
       streamFile("/notFound.html");
+      Serial.println("/homepage.html not found");
     }
   });
+
+  server.on("/favicon.png", HTTP_GET, serveFavicon);
+  server.on("/favicon.ico", HTTP_GET, serveFavicon);
 
   server.onNotFound(notFound);
 
@@ -534,12 +539,30 @@ bool streamFile(String filename) {
 
     String contentType = "";
 
-    if (filename.endsWith(".html") || filename.endsWith(".hml")) {
+    if (path.endsWith(".html") || path.endsWith(".hml")) {
       contentType = "text/html";
-    } else if (filename.endsWith(".css")) {
+    } else if (path.endsWith(".css")) {
       contentType = "text/css";
-    } else if (filename.endsWith(".js")) {
+    } else if (path.endsWith(".js")) {
       contentType = "application/javascript";
+    } else if (path.endsWith(".txt")) {
+      contentType = "text/plain";
+    } else if (path.endsWith(".jpg")) {
+      contentType = "image/jpeg";
+    } else if (path.endsWith(".ico")) {
+      contentType = "image/x-icon";
+    } else if (path.endsWith(".png")) {
+      contentType = "image/png";
+    } else if (path.endsWith(".gif")) {
+      contentType = "image/gif";
+    } else if (path.endsWith(".xml")) {
+      contentType = "text/xml";
+    } else if (path.endsWith(".pdf")) {
+      contentType = "application/x-pdf";
+    } else if (path.endsWith(".zip")) {
+      contentType = "application/x-zip";
+    } else if (path.endsWith(".gz")) {
+      contentType = "application/x-gzip";
     } else {
       contentType = "text/plain";
     }
@@ -594,7 +617,7 @@ void loginAuth() {
 
   else if (server.arg("username") == USERNAME && server.arg("password") == PASSWORD) {
     server.sendHeader("Location", "/HomePage");
-    server.send(200, "text/plain", "Login Successful. Redirecting...");
+    server.send(200);
 
     auth_flag = 1;
 
@@ -633,6 +656,34 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         }
       }
   }
+}
+
+
+void serveFavicon() {
+
+  static const char *paths[] = { "/favicon.png", "/favicon.ico" };
+  static const char *types[] = { "image/png",    "image/x-icon" };
+
+  for (uint8_t i = 0; i < 2; i++) {
+
+    if (!LittleFS.exists(paths[i])) {
+      continue;
+    }
+
+    File file = LittleFS.open(paths[i], "r");
+
+    if (!file) {
+      continue;
+    }
+
+    server.sendHeader("Cache-Control", "public, max-age=86400");
+
+    server.streamFile(file, types[i]);
+    file.close();
+    return;
+  }
+
+  server.send(404, "text/plain", "Favicon not found");
 }
 
 
