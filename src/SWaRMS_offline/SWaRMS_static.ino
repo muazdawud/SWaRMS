@@ -15,14 +15,13 @@
 #define stepSpeed 10U
 #define stepPerRevolution 2048U
 
-#define CP_Distance 5U
-#define IG_Distance 3U
-#define EG_Distance 3U
+#define CP_Distance 1U
+#define IG_Distance 1U
+#define EG_Distance 1U
 
 #define loadCellSck 22U
 #define loadCellData 23U
-#define tareWeight 2280.f
-#define averageRead 3
+#define callibrationWeight 2280.f
 #define W_Threshold 30
 
 #define Fan_Pin 12U
@@ -67,7 +66,8 @@ uint8_t LTS = 0;
 
 volatile uint8_t oldState = 0;
 volatile uint8_t startup_flag = 0;
-uint8_t stepping = 0;
+volatile uint8_t stepping = 0;
+uint8_t stepLED = 0;
 
 uint32_t weight = 0;
 volatile uint32_t count = 0;
@@ -91,10 +91,10 @@ volatile uint32_t fan_counter = 0;
 
 uint8_t auth_flag = 0;
 
-const char *ssid = "REDMI A7 Pro";
-const char *password = "ABCD1234";
+const char *ssid = "";
+const char *password = "";
 
-const char *mDNS_name = "SWaRMS_Dashboard";
+const char *mDNS_name = "SWaRMS";
 
 const char *NTPServerName = "time.nist.gov";
 const int NTP_PACKET_SIZE = 48;
@@ -105,13 +105,15 @@ volatile uint32_t NTPcount = 0;
 volatile uint8_t updateTime = 0;
 uint8_t timeRoutine = 0;
 
-String date = "--";
+String text = "";
+String date = "29/09/2026";
 String timeStr = "--";
+int stationNumber = 0;
 String location = "Bayero University Kano - Rimin Gata";
-String ambientTemp = "--";
-String ambientHum = "--";
-String innerTemp = "--";
-String innerHum = "--";
+String ambientTemp = "30deg";
+String ambientHum = "76%";
+String innerTemp = "32deg";
+String innerHum = "58%";
 
 
 void CP_Step();
@@ -136,6 +138,7 @@ bool streamFile(String filename);
 inline int getHours(uint32_t UNIXTime);
 void sendNTPpacket(IPAddress &address);
 inline int getMinutes(uint32_t UNIXTime);
+inline void updateWebSockets();
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
 
 
@@ -154,6 +157,7 @@ void IRAM_ATTR onTimer() {
     } else {
       portENTER_CRITICAL_ISR(&timerMux);
       timer_flag = true;
+      digitalWrite(RedLED, UNIVERSAL_LOCK);
       portEXIT_CRITICAL_ISR(&timerMux);
     }
 
@@ -163,14 +167,14 @@ void IRAM_ATTR onTimer() {
   }
 
   portENTER_CRITICAL_ISR(&timerMux);
-  if ((interrupt_counter - fan_counter) > 60) {
+  if ((interrupt_counter - fan_counter) > 300) {
     fan_counter = interrupt_counter;
     fan_Flag ^= 1;
   }
   portEXIT_CRITICAL_ISR(&timerMux);
 
   portENTER_CRITICAL_ISR(&timerMux);
-  if ((interrupt_counter - NTPcount) > 30000) {
+  if ((interrupt_counter - NTPcount) > 3000) {
     NTPcount = interrupt_counter;
     updateTime ^= 1;
   }
@@ -179,8 +183,6 @@ void IRAM_ATTR onTimer() {
 
 
 void setup() {
-
-  Serial.begin(115200);
 
   pinMode(RedLED, OUTPUT);
   pinMode(BlueLED, OUTPUT);
@@ -196,27 +198,20 @@ void setup() {
   timerAttachInterrupt(timer, &onTimer);
   timerAlarm(timer, 100, true, 0);
 
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(200);
+  }
+
   startup_flag = 1;
 
   testStepper();
-
   initScale();
-
   startLittleFS();
-
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-  }
-
-  Serial.println(WiFi.localIP());
-
   startUDP();
   startWebServer();
   startWebSocket();
-
   WiFi.hostByName(NTPServerName, timeServerIP);
-
   MDNS.begin(mDNS_name);
 
   updateTime = 1;
@@ -240,6 +235,12 @@ void loop() {
     }
   }
 
+  if (updateTime) {
+    sendNTPpacket(timeServerIP);
+    timeRoutine = 1;
+    updateTime = 0;
+  }
+
   if (CP_State) {
 
     CP_Step();
@@ -260,7 +261,7 @@ void loop() {
 
     weight = handlePollScale();
 
-    if (/*weight >= ((W_Threshold / 10) * 7)*/ weight >= W_Threshold) {
+    if (weight >= ((W_Threshold / 10) * 7)) {
       digitalWrite(YellowLED, HIGH);
     } else {
       digitalWrite(YellowLED, LOW);
@@ -269,12 +270,8 @@ void loop() {
 
   if (weight >= ((W_Threshold / 10) * 5)) {
     digitalWrite(Fan_Pin, fan_Flag);
-  }
-
-  if (updateTime) {
-    sendNTPpacket(timeServerIP);
-    timeRoutine = 1;
-    updateTime = 0;
+  }else{
+    digitalWrite(Fan_Pin, LOW);
   }
 }
 
@@ -282,7 +279,7 @@ void loop() {
 void initScale() {
 
   scale.begin(loadCellData, loadCellSck);
-  scale.set_scale(tareWeight);
+  scale.set_scale(callibrationWeight);
   scale.tare();
 
   weight = handlePollScale();
@@ -331,7 +328,6 @@ void startWebServer() {
   server.on("/HomePage", HTTP_GET, [] {
     if (!streamFile("/homepage.html")) {
       streamFile("/notFound.html");
-      Serial.println("/homepage.html not found");
     }
   });
 
@@ -441,8 +437,23 @@ void interrupt_routine() {
 
     if (actualTime != prevActualTime && timeUNIX != 0) {
       prevActualTime = actualTime;
-      timeStr = String(getHours(actualTime)) + ":" + String(getMinutes(actualTime));
+      int hour = getHours(actualTime);
+      int minutes = getMinutes(actualTime);
+
+      if(hour < 10){
+        timeStr = "0" + String(hour) + ":";
+      }else{
+        timeStr = String(hour) + ":";
+      }
+
+      if(minutes < 10){
+        timeStr += "0" + String(minutes);
+      }else{
+        timeStr += String(minutes);
+      }
     }
+
+    updateWebSockets();
 
     timeRoutine = 0;
   }
@@ -470,19 +481,24 @@ uint32_t handlePollScale() {
 void CP_Step() {
 
   oldState = 1;
+  stepLED = 0;
 
   int8_t steps = (CP_Position) ? -1 : 1;
 
   for (uint8_t i = 0; i < CP_Distance; i++) {
     for (uint16_t k = 0; k < stepPerRevolution; k++) {
       CP_Stepper.step(steps);
+      if((k - stepLED) >= 128){
+        digitalWrite(BlueLED, (oldState ^= 1));
+        stepLED = k;
+      }
     }
-    digitalWrite(BlueLED, (oldState ^= 1));
   }
 
   digitalWrite(BlueLED, HIGH);
   CP_State = 0;
   CP_Position ^= 1;
+  stepLED = 0;
   oldState = 0;
 }
 
@@ -490,19 +506,24 @@ void CP_Step() {
 void IG_Step() {
 
   oldState = 1;
+  stepLED = 0;
 
   int8_t steps = (IG_Position) ? -1 : 1;
 
   for (uint8_t i = 0; i < IG_Distance; i++) {
     for (uint16_t k = 0; k < stepPerRevolution; k++) {
       IG_Stepper.step(steps);
+      if((k - stepLED) >= 128){
+        digitalWrite(BlueLED, (oldState ^= 1));
+        stepLED = k;
+      }
     }
-    digitalWrite(BlueLED, (oldState ^= 1));
   }
 
   digitalWrite(BlueLED, HIGH);
   IG_State = 0;
   IG_Position ^= 1;
+  stepLED = 0;
   oldState = 0;
 }
 
@@ -510,19 +531,24 @@ void IG_Step() {
 void EG_Step() {
 
   oldState = 1;
+  stepLED = 0;
 
   int8_t steps = (EG_Position) ? -1 : 1;
 
   for (uint8_t i = 0; i < EG_Distance; i++) {
     for (uint16_t k = 0; k < stepPerRevolution; k++) {
       EG_Stepper.step(steps);
+      if((k - stepLED) >= 128){
+        digitalWrite(BlueLED, (oldState ^= 1));
+        stepLED = k;
+      }
     }
-    digitalWrite(BlueLED, (oldState ^= 1));
   }
 
   digitalWrite(BlueLED, HIGH);
   EG_State = 0;
   EG_Position ^= 1;
+  stepLED = 0;
   oldState = 0;
 }
 
@@ -638,21 +664,24 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 
   switch (type) {
     case WStype_DISCONNECTED:
+      {
+        stationNumber = 0;
+      }
       break;
     case WStype_CONNECTED:
       {
         ip = webSocket.remoteIP(num);
+        stationNumber = num+1;
       }
       break;
     case WStype_TEXT:
       {
-        String text = "";
+        stationNumber = num+1;
         char *data = (char *)payload;
 
         if (strcmp(data, "Refresh") == 0) {
 
-          text = "Station Info: " + date + "," + timeStr + "," + String((int)num) + "," + location + "," + ambientTemp + "," + ambientHum + "," + String((int)UNIVERSAL_LOCK) + "," + String(W_Threshold) + "," + String(weight) + "," + innerTemp + "," + innerHum + "," + String(fan_Flag);
-          webSocket.sendTXT(num, text.c_str());
+          updateWebSockets();
         }
       }
   }
@@ -714,6 +743,13 @@ void sendNTPpacket(IPAddress &address) {
   UDP.beginPacket(address, 123);
   UDP.write(NTPBuffer, NTP_PACKET_SIZE);
   UDP.endPacket();
+}
+
+
+inline void updateWebSockets(){
+  text = "";
+  text = "Station Info: " + date + "," + timeStr + "," + String(stationNumber) + "," + location + "," + ambientTemp + "," + ambientHum + "," + String((int)UNIVERSAL_LOCK) + "," + String(W_Threshold) + "," + String(weight) + "," + innerTemp + "," + innerHum + "," + String(fan_Flag);
+  webSocket.sendTXT(stationNumber-1, text.c_str());
 }
 
 
