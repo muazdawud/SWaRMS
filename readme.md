@@ -157,6 +157,6 @@ lock,threshold,weight,innerTemp,innerHum,fanFlag
 
 ## License
 
-Copyright © 2026 Ecotronics Automation Concepts
+Copyright © 2026 Dauda Muazu Sulaiman, Ecotronics Automation Concepts. All rights reserved.
 
 Internal project — Bayero University Kano, Rimin Gata.
