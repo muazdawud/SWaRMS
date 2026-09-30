@@ -1,0 +1,5 @@
+Copyright (c) 2026 Dauda Muazu Sulaiman, Ecotronics Automation Concepts. All Rights Reserved.
+
+This source code is provided for viewing purposes only.
+No permission is granted to copy, modify, distribute, sublicense,
+or use this software, in whole or in part, for any purpose.
